@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: uncinq-website
+    runtime: node
+    plan: starter # free spins down after inactivity — cold starts of 30–60s
+    region: ohio
+    branch: main
+    # --include=dev is required: typescript, tailwindcss and eslint-config-next
+    # are devDependencies, and Render sets NODE_ENV=production, which would
+    # otherwise prune them and fail the build.
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm run start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: RESEND_API_KEY
+        sync: false # set in the Render dashboard, never in this file
+      - key: CONTACT_FROM_EMAIL
+        sync: false
+      - key: CONTACT_TO_EMAIL
+        sync: false

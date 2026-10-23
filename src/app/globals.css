@@ -1,0 +1,105 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  /* Neutrals — true-black first, matching the DeepSeek harness aesthetic.
+     ink-950 is pure black; the rest are barely-lifted greys for surfaces. */
+  --color-ink-950: #000000;
+  --color-ink-900: #060708;
+  --color-ink-850: #0b0d10;
+  --color-ink-800: #121519;
+  --color-ink-700: #1a1f25;
+  --color-ink-600: #2a313a;
+  --color-ink-500: #4a545f;
+  --color-ink-400: #6b7683;
+  --color-ink-300: #98a2ae;
+  --color-ink-200: #c2c9d2;
+  --color-ink-100: #e4e8ee;
+  --color-ink-50: #f5f7fa;
+
+  /* Accent — cooled toward the DeepSeek harness blue (#4A8AC4 family) */
+  --color-accent-300: #9cc7ec;
+  --color-accent-400: #6fb0e2;
+  --color-accent-500: #4a8ac4;
+  --color-accent-600: #35709f;
+  --color-accent-700: #255678;
+
+  --font-display: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-ink-950);
+    color: var(--color-ink-200);
+    font-family: var(--font-sans);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    color: var(--color-ink-50);
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background-color: var(--color-accent-500);
+    color: white;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent-400);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+}
+
+@layer components {
+  /* Small labelled rule that sits above each section title */
+  .eyebrow {
+    @apply inline-flex items-center gap-2.5 text-xs font-medium uppercase tracking-[0.18em] text-accent-400;
+  }
+
+  .eyebrow::before {
+    content: "";
+    @apply block h-px w-8 bg-accent-500/60;
+  }
+
+  /* Card surface used across services / work / process */
+  .surface {
+    @apply relative rounded-2xl border border-white/10 bg-ink-850;
+  }
+
+  .surface-hover {
+    @apply transition-colors duration-300 hover:border-accent-500/40 hover:bg-ink-800;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
