@@ -4,7 +4,6 @@ import { motion, useReducedMotion } from "motion/react";
 import { ArrowRight } from "lucide-react";
 import { ButtonLink } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
-import { HeroGradient } from "@/components/home/hero-gradient";
 import { DotGrid } from "@/components/motion/dot-grid";
 
 export function Hero() {
@@ -21,34 +20,7 @@ export function Hero() {
 
   return (
     <section className="relative isolate overflow-hidden pb-24 pt-40 lg:pb-32 lg:pt-52">
-      {/* Full animated WebGL gradient, fading to black toward the bottom. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10"
-        style={{
-          maskImage:
-            "linear-gradient(#000000fc 0%, #000000e8 8.98%, transparent 100%)",
-          WebkitMaskImage:
-            "linear-gradient(#000000fc 0%, #000000e8 8.98%, transparent 100%)",
-        }}
-      >
-        <HeroGradient />
-      </div>
-
-      {/* Interactive dotted "world map" grid, layered over the gradient and
-          faded out toward the bottom — the DeepSeek hero texture. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-[5]"
-        style={{
-          maskImage:
-            "linear-gradient(#000000fc 0%, #000000e8 8.98%, transparent 100%)",
-          WebkitMaskImage:
-            "linear-gradient(#000000fc 0%, #000000e8 8.98%, transparent 100%)",
-        }}
-      >
-        <DotGrid spacing={80} lineOpacity={0.06} dotOpacity={0.18} />
-      </div>
+      <HeroBackdrop />
 
       <Container>
         <div className="max-w-4xl">
@@ -91,5 +63,64 @@ export function Hero() {
         </div>
       </Container>
     </section>
+  );
+}
+
+/**
+ * Dark backdrop in three layers: a faint large lattice, an ambient blue wash
+ * rising from the lower centre, and a drifting cluster of particles that part
+ * around the cursor. Deliberately avoids any large continuous shape — earlier
+ * gradient-based versions resolved into faces or clustered holes.
+ */
+function HeroBackdrop() {
+  const edgeFade =
+    "radial-gradient(ellipse 85% 75% at 50% 35%, #000 35%, transparent 78%)";
+
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+      {/* Faint lattice, fading out toward the edges. */}
+      <div
+        className="absolute inset-0 opacity-[0.05]"
+        style={{
+          backgroundImage:
+            "linear-gradient(to right, white 1px, transparent 1px)," +
+            "linear-gradient(to bottom, white 1px, transparent 1px)",
+          backgroundSize: "164px 164px",
+          maskImage: edgeFade,
+          WebkitMaskImage: edgeFade,
+        }}
+      />
+
+      {/* Ambient blue, strongest low and centre-right. */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(ellipse 75% 55% at 52% 102%, rgba(43,108,158,0.40), transparent 72%)," +
+            "radial-gradient(ellipse 48% 42% at 80% 52%, rgba(32,86,134,0.26), transparent 72%)",
+        }}
+      />
+
+      {/* Particle cluster, offset right so it does not sit under the copy. */}
+      <div className="absolute inset-y-0 left-[26%] right-0">
+        <DotGrid
+          variant="cluster"
+          idle
+          entrance
+          spacing={46}
+          dotSize={1.4}
+          repelRadius={150}
+          lineColor="rgba(130, 180, 230,"
+          dotColor="rgba(170, 208, 242,"
+          lineOpacity={0.07}
+          dotOpacity={0.5}
+          clusterRadiusX={0.44}
+          clusterRadiusY={0.46}
+        />
+      </div>
+
+      {/* Settle back into the page background. */}
+      <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-ink-950 to-transparent" />
+    </div>
   );
 }

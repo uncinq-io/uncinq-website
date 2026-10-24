@@ -20,6 +20,12 @@ type DotGridProps = {
   /** If true, dots gently drift on their own even without cursor input. */
   idle?: boolean;
   /**
+   * If true, the field scatters outward the first time it scrolls into view
+   * and springs back to rest — a quick assembling rush that decays into the
+   * slow `idle` drift.
+   */
+  entrance?: boolean;
+  /**
    * "grid" = uniform full-bleed lattice (hero). "cluster" = an organic blob of
    * dots concentrated toward the centre with radial density falloff, like
    * DeepSeek's "Join the DSH plugin ecosystem" background.
@@ -60,6 +66,7 @@ export function DotGrid({
   dotOpacity = 0.28,
   isStatic = false,
   idle = false,
+  entrance = false,
   variant = "grid",
   clusterRadiusX = 0.34,
   clusterRadiusY = 0.4,
@@ -147,6 +154,26 @@ export function DotGrid({
       }
     }
 
+    /**
+     * Throw every dot outward from the centre. The existing spring pulls
+     * them home, so the motion is fast on release and decays on its own —
+     * no separate easing curve needed.
+     */
+    function scatter() {
+      const cx = w / 2;
+      const cy = h / 2;
+      for (const d of dots) {
+        const dx = d.restX - cx;
+        const dy = d.restY - cy;
+        const len = Math.hypot(dx, dy) || 1;
+        const push = 26 + Math.random() * 46;
+        d.x = d.restX + (dx / len) * push + (Math.random() - 0.5) * 18;
+        d.y = d.restY + (dy / len) * push + (Math.random() - 0.5) * 18;
+        d.vx = 0;
+        d.vy = 0;
+      }
+    }
+
     function onMove(e: MouseEvent) {
       if (isStatic) return;
       const r = canvas!.getBoundingClientRect();
@@ -187,8 +214,8 @@ export function DotGrid({
 
         // Gentle autonomous drift so the field reads as "alive" without input.
         if (idle) {
-          d.vx += Math.sin(tSec * 0.6 + d.restY * 0.02 + i * 0.13) * 0.012;
-          d.vy += Math.cos(tSec * 0.5 + d.restX * 0.02 + i * 0.11) * 0.012;
+          d.vx += Math.sin(tSec * 0.34 + d.restY * 0.02 + i * 0.13) * 0.005;
+          d.vy += Math.cos(tSec * 0.29 + d.restX * 0.02 + i * 0.11) * 0.005;
         }
 
         const dx = d.x - mx;
@@ -324,10 +351,16 @@ export function DotGrid({
       }
     }
 
+    let hasEntered = false;
     const io = new IntersectionObserver(
       (entries) => {
         running = entries[0].isIntersecting;
         if (running && !reduceMotion && !isStatic) {
+          // Fire the entrance burst once, the first time it is seen.
+          if (entrance && !hasEntered) {
+            hasEntered = true;
+            scatter();
+          }
           sleeping = false;
           wake();
         }
@@ -343,7 +376,7 @@ export function DotGrid({
       window.removeEventListener("mousemove", onMove);
       io.disconnect();
     };
-  }, [reduceMotion, spacing, repelRadius, dotSize, lineColor, dotColor, lineOpacity, dotOpacity, isStatic, idle, variant, clusterRadiusX, clusterRadiusY]);
+  }, [reduceMotion, spacing, repelRadius, dotSize, lineColor, dotColor, lineOpacity, dotOpacity, isStatic, idle, entrance, variant, clusterRadiusX, clusterRadiusY]);
 
   return (
     <canvas
